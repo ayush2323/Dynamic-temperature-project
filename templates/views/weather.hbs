@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+{{>headerlinks}}
+<body>
+    {{>navbar}}
+
+    <div class="container-fluid main_header">
+        <div class="row">
+            <div class="col-md-10 col-12 mx-auto">
+                <div class="main_content">
+                    <form class="temp_form">
+                        <input type="text" name="" id="cityName" placeholder="Enter Your City Nmae" autocomplete="off">
+                        <input type="submit" value="search" id="submitBtn" style="outline: none">
+                    </form>
+                </div>
+
+                <div class="tempInformation">
+                    <div class="top_layer">
+                        <p id="day">Thursday</p>
+                        <p id="today_date">13 oct</p>
+                    </div>
+                    <div class="main_layer">
+                        <p id="city_name">Get Output Here</p>
+                        <div class="middle_layer data_hide">
+                            <p id="temp"><span id="temp_real_val">0</span><sup>o</sup>C</p>
+                            <p id="temp_status"></p></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{>footer}}
+
+    <script>
+        const submitBtn = document.getElementById('submitBtn')
+        const cityName = document.getElementById('cityName')
+        const city_name = document.getElementById('city_name')
+        const temp_status = document.getElementById('temp_status')
+        const temp = document.getElementById('temp')
+        const dataHide = document.querySelector('.middle_layer')
+        const temp_real_val = document.getElementById('temp_real_val')
+
+        const getCurrentDay = () => {
+            let weekday = new Array(7);
+            weekday[0] = "Sunday";
+            weekday[1] = "Monday";
+            weekday[2] = "Tuesday";
+            weekday[3] = "Wednesday";
+            weekday[4] = "Thursday";
+            weekday[5] = "Friday";
+            weekday[6] = "Saturday";
+
+            let currentTime = new Date();
+            days = weekday[currentTime.getDay()];
+            let day = document.getElementById('day')
+            day.innerText = days;
+        };
+
+        const getCurrentTime = () => {
+            let months = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "June",
+            "July",
+            "Aug",
+            "Sept",
+            "Oct",
+            "Nov",
+            "Dec",
+            ];
+
+            let now = new Date();
+            let month = months[now.getMonth()];
+            let date = now.getDate();
+            let today_date = document.getElementById('today_date')
+            today_date.innerText = `${date} ${month}`
+        };
+
+        getCurrentDay()
+        getCurrentTime()
+
+        const getInfo = async (event) => {
+            event.preventDefault()
+            
+            let cityVal = cityName.value
+            if(cityVal === ""){
+                city_name.innerHTML = "Please write the name before you search"
+                dataHide.classList.add('data_hide')
+            }
+            else{
+                try {
+                    let url = `http://api.openweathermap.org/data/2.5/weather?q=${cityVal}&units=metric&appid=7d276015941d7127fb5fc5b290907321`
+                    const response = await fetch(url)
+                    const data = await response.json()
+                    const arrData = [data]
+                    city_name.innerText = `${arrData[0].name},${arrData[0].sys.country}`
+                    temp_real_val.innerText = arrData[0].main.temp
+                    let tempMood = arrData[0].weather[0].main
+
+                    if (tempMood == "Clear") {
+                        temp_status.innerHTML = "<i class='fas  fa-sun' style='color: #eccc68;'></i>";
+                    } else if (tempMood == "Clouds") {
+                        temp_status.innerHTML = "<i class='fas  fa-cloud' style='color: #f1f2f6;'></i>";
+                    } else if (tempMood == "Rain") {
+                        temp_status.innerHTML = "<i class='fas  fa-cloud-rain' style='color: #a4b0be;'></i>";
+                    } else {
+                        temp_status.innerHTML = "<i class='fas  fa-cloud' style='color:#f1f2f6;'></i>";
+                    }
+                    dataHide.classList.remove('data_hide');
+                    cityVal = "";
+                }
+                catch {
+                    city_name.innerText = "Please enter the city name properly"
+                    dataHide.classList.add('data_hide')
+                }
+            }
+        }
+
+        submitBtn.addEventListener('click', getInfo)
+    </script>
+
+</body>
+</html>
